@@ -8,6 +8,7 @@ import { Estimate } from "../types";
 import { theme } from "../theme";
 import arrayMutators from "final-form-arrays";
 import { getNextEstimateNo } from "../utils/estimateNo";
+import VSSLogo from "../assets/logo";
 
 const Page = styled.div`
   min-height: 100vh;
@@ -98,11 +99,11 @@ const initial: Estimate = {
   items: [],
   discountPct: 0,
   shop: {
-    name: "VSS Auto Body Works",
-    address: "Anna Nagar, Chennai",
-    phone: "+91 9xxxx xxxxx",
-    gstin: "33XXXXXXXXX1Z5",
-    logoUrl: "",
+    name: "VSS SPRAY PAINTING WOKS",
+    address: "RBT Garden, Ponni weigh Bridge Service Road, Salem – 636 302",
+    phone: "+91 9443340060 ",
+    gstin: "33ASPPN4765Q1ZS",
+    logoUrl: VSSLogo,
   },
 };
 
