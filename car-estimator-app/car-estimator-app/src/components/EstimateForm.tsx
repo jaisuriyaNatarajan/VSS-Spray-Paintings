@@ -1,14 +1,28 @@
-import React, { useRef } from "react";
-import styled, { ThemeProvider } from "styled-components";
+// src/components/EstimateForm.tsx
+import React, { useRef, useState, useMemo } from "react";
+import styled, { ThemeProvider, createGlobalStyle } from "styled-components";
 import { Form, Field } from "react-final-form";
 import { LineItems } from "./LineItems";
 import { EstimatePreview } from "./EstimatePreview";
 import { exportElementToPDF } from "../utils/pdf";
 import { Estimate } from "../types";
-import { theme } from "../theme";
 import arrayMutators from "final-form-arrays";
 import { getNextEstimateNo } from "../utils/estimateNo";
 import VSSLogo from "../assets/logo";
+import {
+  darkTheme,
+  lightTheme,
+  getInitialTheme,
+  setThemeName,
+  ThemeName,
+} from "../theme";
+
+const Global = createGlobalStyle`
+  body {
+    background: ${({ theme }) => theme.colors.bg};
+    color: ${({ theme }) => theme.colors.text};
+  }
+`;
 
 const Page = styled.div`
   min-height: 100vh;
@@ -31,7 +45,7 @@ const Panel = styled.div`
 const H = styled.h3`
   margin: 0 0 12px;
   font-size: 16px;
-  color: #e6e6e6;
+  color: ${({ theme }) => theme.colors.text};
 `;
 
 const G = styled.div`
@@ -45,14 +59,14 @@ const FieldWrap = styled.div`
   flex-direction: column;
   span.label {
     font-size: 12px;
-    color: #a9b0c3;
+    color: ${({ theme }) => theme.colors.subtle};
     margin-bottom: 6px;
   }
   input,
   textarea {
-    background: #121722;
-    border: 1px solid #273046;
-    color: #e6e6e6;
+    background: ${({ theme }) => theme.colors.bg};
+    border: 1px solid ${({ theme }) => theme.colors.border};
+    color: ${({ theme }) => theme.colors.text};
     border-radius: 8px;
     padding: 10px 12px;
     font-size: 13px;
@@ -89,6 +103,20 @@ const PreviewShell = styled.div`
   align-items: center;
 `;
 
+const ThemeSwitch = styled.button`
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background: ${({ theme }) => theme.colors.panel};
+  color: ${({ theme }) => theme.colors.text};
+  box-shadow: ${({ theme }) => theme.shadows.sm};
+  cursor: pointer;
+  font-size: 12px;
+`;
+
 const initial: Estimate = {
   estimateNo: getNextEstimateNo(),
   date: new Date().toISOString().slice(0, 10),
@@ -110,11 +138,27 @@ const initial: Estimate = {
 export default function EstimateForm() {
   const previewRef = useRef<HTMLDivElement | null>(null);
 
+  const [themeName, setTheme] = useState<ThemeName>(() => getInitialTheme());
+  const theme = useMemo(
+    () => (themeName === "dark" ? darkTheme : lightTheme),
+    [themeName]
+  );
+
+  const toggleTheme = () => {
+    const next = themeName === "dark" ? "light" : "dark";
+    setTheme(next);
+    setThemeName(next);
+  };
+
   return (
     <ThemeProvider theme={theme}>
+      <Global />
+      <ThemeSwitch onClick={toggleTheme}>
+        Switch to {themeName === "dark" ? "Light" : "Dark"} Theme
+      </ThemeSwitch>
+
       <Form<Estimate>
         onSubmit={() => {}}
-        // Provide mutators directly from final-form-arrays so useForm().mutators works.
         mutators={{ ...arrayMutators }}
         initialValues={initial}
         render={({ handleSubmit, values }) => (

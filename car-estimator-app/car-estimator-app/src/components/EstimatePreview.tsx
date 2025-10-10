@@ -5,7 +5,7 @@ import { fmt, sumItems, lineTotal, lineTax } from "../utils/currency";
 
 const Wrapper = styled.div`
   width: 794px; /* ~A4 width at 96dpi */
-  background: #10131a;
+  background: ${({ theme }) => theme.colors.bg}; /* <-- was hardcoded dark */
   color: ${({ theme }) => theme.colors.text};
   border: 1px solid ${({ theme }) => theme.colors.border};
   border-radius: ${({ theme }) => theme.radii.md};
@@ -21,10 +21,12 @@ const Header = styled.div`
   justify-content: space-between;
   margin-bottom: 16px;
 `;
+
 const Brand = styled.div`
   display: flex;
   gap: 12px;
   align-items: center;
+
   img {
     height: 40px;
     border-radius: 8px;
@@ -38,6 +40,7 @@ const Brand = styled.div`
     font-size: 12px;
   }
 `;
+
 const Title = styled.div`
   text-align: right;
   .label {
@@ -63,6 +66,7 @@ const Row = styled.div`
   column-gap: 16px;
   row-gap: 8px;
   font-size: 13px;
+
   .label {
     color: ${({ theme }) => theme.colors.subtle};
     font-size: 12px;
@@ -77,6 +81,7 @@ const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
+
   th,
   td {
     border-bottom: 1px solid ${({ theme }) => theme.colors.border};
@@ -96,25 +101,44 @@ const Table = styled.table`
   }
 `;
 
+/* keep totals & footer on same page */
+const KeepTogether = styled.div`
+  break-inside: avoid;
+  page-break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  -webkit-region-break-inside: avoid;
+`;
+
 const Totals = styled.div`
   margin-top: 12px;
   display: grid;
   grid-template-columns: 1fr 220px;
   gap: 12px;
+
+  break-inside: avoid;
+  page-break-inside: avoid;
+
   .box {
     background: ${({ theme }) => theme.colors.panel};
     border: 1px solid ${({ theme }) => theme.colors.border};
     border-radius: 10px;
     padding: 12px;
+
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
+
   .right {
     justify-self: end;
     width: 100%;
   }
+
   .line {
     display: flex;
     justify-content: space-between;
     margin: 6px 0;
+    white-space: nowrap;
+
     .k {
       color: ${({ theme }) => theme.colors.subtle};
     }
@@ -122,10 +146,13 @@ const Totals = styled.div`
       font-weight: 600;
     }
   }
+
   .grand {
     border-top: 1px dashed ${({ theme }) => theme.colors.border};
     padding-top: 8px;
     margin-top: 8px;
+    white-space: nowrap;
+
     .v {
       color: ${({ theme }) => theme.colors.accent};
       font-size: 16px;
@@ -133,7 +160,6 @@ const Totals = styled.div`
   }
 `;
 
-// NEW: Footer
 const Footer = styled.div`
   margin-top: 30px;
   padding-top: 10px;
@@ -164,7 +190,6 @@ const Footer = styled.div`
   }
 `;
 
-// (Optional) ensure there is **no extra bottom padding** beyond this footer
 const EndSpacer = styled.div`
   height: 0;
 `;
@@ -285,57 +310,72 @@ export const EstimatePreview: React.FC<Props> = ({ data, forwardedRef }) => {
         </Table>
       </Section>
 
-      <Totals>
-        <div className="box">
-          <div style={{ fontSize: 12, color: "#9aa3b2" }}>
-            * This is an estimate. Final invoice may vary due to additional
-            parts, labor, or color matching adjustments.
-          </div>
-        </div>
-        <div className="box right">
-          <div className="line">
-            <div className="k">Subtotal</div>
-            <div className="v">{fmt(subtotal, data.currency)}</div>
-          </div>
-          <div className="line">
-            <div className="k">Tax</div>
-            <div className="v">{fmt(tax, data.currency)}</div>
-          </div>
-          {data.discountPct ? (
-            <div className="line">
-              <div className="k">Discount ({data.discountPct}%)</div>
-              <div className="v">- {fmt(discount, data.currency)}</div>
+      <KeepTogether>
+        <Totals>
+          <div className="box">
+            <div
+              style={{ fontSize: 12, color: "inherit" /* uses subtle below */ }}
+            >
+              <span style={{ color: "inherit" }}>
+                {/* use subtle via parent color: */}
+              </span>
+              <span style={{ color: "inherit" }}>
+                {/* set color on parent box, easier: */}
+              </span>
+              <span style={{ color: "inherit" }} />
             </div>
-          ) : null}
-          <div className="line grand">
-            <div className="k">Grand Total</div>
-            <div className="v">{fmt(grandAfterDiscount, data.currency)}</div>
+            <div
+              style={{
+                fontSize: 12,
+                color: "inherit",
+              }}
+            />
           </div>
-        </div>
-      </Totals>
 
-      {/* NEW Footer */}
-      <Footer>
-        <div className="left">
-          Thank you for choosing {data.shop.name || "our workshop"}.{"\n"}Please
-          review this estimate carefully. Prices are valid for 7 days.
-          {"\n"}Paint shade may vary slightly due to age/fade of existing
-          panels.
-        </div>
-        <div className="right">
-          <div className="sig">
-            <div>Customer Signature</div>
-            <div className="line" />
+          <div className="box right" style={{ color: "inherit" }}>
+            <div className="line">
+              <div className="k">Subtotal</div>
+              <div className="v">{fmt(subtotal, data.currency)}</div>
+            </div>
+            <div className="line">
+              <div className="k">Tax</div>
+              <div className="v">{fmt(tax, data.currency)}</div>
+            </div>
+            {data.discountPct ? (
+              <div className="line">
+                <div className="k">Discount ({data.discountPct}%)</div>
+                <div className="v">- {fmt(discount, data.currency)}</div>
+              </div>
+            ) : null}
+            <div className="line grand">
+              <div className="k">Grand Total</div>
+              <div className="v">{fmt(grandAfterDiscount, data.currency)}</div>
+            </div>
           </div>
-          <div className="sig">
-            <div>Authorized By</div>
-            <div className="line" />
+        </Totals>
+
+        <Footer>
+          <div className="left">
+            Thank you for choosing {data.shop.name || "our workshop"}.{"\n"}
+            Please review this estimate carefully. Prices are valid for 7 days.
+            {"\n"}Paint shade may vary slightly due to age/fade of existing
+            panels.
           </div>
-          <div style={{ textAlign: "right", fontSize: 11, color: "#8f97aa" }}>
-            Powered by VSS Estimate • {new Date().toLocaleDateString()}
+          <div className="right">
+            <div className="sig">
+              <div>Customer Signature</div>
+              <div className="line" />
+            </div>
+            <div className="sig">
+              <div>Authorized By</div>
+              <div className="line" />
+            </div>
+            <div style={{ textAlign: "right", fontSize: 11, color: "inherit" }}>
+              Powered by VSS Estimate • {new Date().toLocaleDateString()}
+            </div>
           </div>
-        </div>
-      </Footer>
+        </Footer>
+      </KeepTogether>
 
       <EndSpacer />
     </Wrapper>
